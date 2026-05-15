@@ -63,7 +63,7 @@ Each batch takes approximately **200 minutes** to process (25 folders × ~8 min 
 
 ## 🖥️ Hardware & Model
 
-Runs entirely on a **Mac Mini M4 Pro** (24GB unified memory) with **Qwen2.5-VL-32B-Instruct** served via ollama (~20GB VRAM). A single model serves both agents, zero model swaps, fully offline, PIPEDA compliant. No client data leaves the machine.
+Runs entirely on a **Mac Mini M4 Pro** (24GB unified memory) with **Qwen2.5-VL-32B-Instruct** served via Ollama 🦙 (~20GB VRAM). A single model serves both agents, with zero model swaps, fully offline, and PIPEDA-compliant. No client data leaves the machine.
 
 ## 🗂️ Project Structure
 
