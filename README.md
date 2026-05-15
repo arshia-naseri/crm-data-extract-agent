@@ -16,11 +16,13 @@ Traditional parsing is impossible. Every folder is different. An LLM-based appro
 
 `split_batches.py` splits the 1,696 client folder names into 68 batch files of ~25 folders each, written to `batch/`.
 
+![Agent Architecture](docs/agent_arch.svg)
+
 ### Stage 2 — Extract
 
 Codex CLI reads `Main_Prompt.md`, checks the last git commit for progress (`Batch X,Y,Z,W Done`), and picks the next 4 batches to process. For each batch:
 
-1. **Forge** agent reads the batch file, spawns one **Miner** agent per folder (sequentially).
+1. **Forge** agent reads the batch file, spawns **Miner** agents per folder (up to 3 concurrently).
 2. **Miner** reads every file in the folder recursively, extracts text from PDFs, OCRs scanned documents using the model's native vision, reads Word/Excel files, and returns structured JSON or `NO_ROW`. Up to 3 miners run concurrently per batch.
 3. **Forge** aggregates all miner results, deduplicates, normalizes, and writes a CSV to `tmp/batch_{N}_table.csv`.
 4. A git commit (`Batch X,Y,Z,W Done`) tracks progress so the pipeline can resume.
@@ -91,11 +93,14 @@ crm-data-extract-agent/
 ├── client_info/            # 1,696 client folders with insurance documents
 ├── batch/                  # 68 batch files, each listing ~25 folder names
 ├── tmp/                    # 68 per-batch CSV outputs from Forge
+├── docs/
+│   ├── pipeline.svg            # Data pipeline diagram
+│   └── agent_arch.svg          # Agent architecture diagram
 ├── .codex/
 │   └── agents/
 │       ├── forge_local.toml    # Batch orchestrator agent
 │       └── miner_local.toml    # Per-folder extractor agent
-├── prompt.md               # Pipeline entry point (read by Codex CLI)
+├── Main_Prompt.md              # Pipeline entry point (read by Codex CLI)
 ├── split_batches.py        # Stage 1: split folders into batches
 ├── join_batches.py         # Stage 3: merge batch CSVs into final CRM
 ├── full_crm.csv            # Final output
