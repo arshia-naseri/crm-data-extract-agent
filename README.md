@@ -21,7 +21,7 @@ Traditional parsing is impossible. Every folder is different. An LLM-based appro
 Codex CLI reads `Main_Prompt.md`, checks the last git commit for progress (`Batch X,Y,Z,W Done`), and picks the next 4 batches to process. For each batch:
 
 1. **Forge** agent reads the batch file, spawns one **Miner** agent per folder (sequentially).
-2. **Miner** reads every file in the folder recursively, extracts text from PDFs, OCRs scanned documents using the model's native vision, reads Word/Excel files, and returns structured JSON or `NO_ROW`.
+2. **Miner** reads every file in the folder recursively, extracts text from PDFs, OCRs scanned documents using the model's native vision, reads Word/Excel files, and returns structured JSON or `NO_ROW`. Up to 3 miners run concurrently per batch.
 3. **Forge** aggregates all miner results, deduplicates, normalizes, and writes a CSV to `tmp/batch_{N}_table.csv`.
 4. A git commit (`Batch X,Y,Z,W Done`) tracks progress so the pipeline can resume.
 
@@ -78,11 +78,11 @@ A 16-column CRM table with one row per (insured person, policy) combination.
 
 ## ⏱️ Performance
 
-Each batch takes approximately **200 minutes** to process (25 folders × ~8 min per folder, sequential). The full 68-batch pipeline completes in roughly **9 days** of continuous runtime.
+Each batch takes approximately **100 minutes** to process (25 folders × ~8 min per folder, 3 concurrent miners). The full 68-batch pipeline completes in roughly **5 days** of continuous runtime.
 
 ## 🖥️ Hardware & Model
 
-Runs entirely on a **Mac Mini M4 Pro** (24GB unified memory) with **Qwen2.5-VL-32B-Instruct** served via Ollama 🦙 (~20GB VRAM). A single model serves both agents, with zero model swaps, fully offline, and PIPEDA-compliant. No client data leaves the machine.
+Runs entirely on a **Mac Mini M4 Pro** (24GB unified memory) with **Qwen2.5-VL-32B-Instruct** served via Ollama 🦙 (~20GB VRAM). A single model instance serves both agents with up to 3 concurrent inference requests (`OLLAMA_NUM_PARALLEL=3`), zero model swaps, fully offline, and PIPEDA-compliant. No client data leaves the machine.
 
 ## 🗂️ Project Structure
 
