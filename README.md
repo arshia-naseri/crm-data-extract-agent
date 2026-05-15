@@ -10,12 +10,7 @@ Traditional parsing is impossible. Every folder is different. An LLM-based appro
 
 ## ⚙️ How It Works
 
-```
-client_info/        batch/              tmp/                full_crm.csv
-(1,696 folders) --> (68 batch files) --> (68 CSV files) --> (final CRM)
-     Stage 1            Stage 2              Stage 3
-   Splitting          Processing            Joining
-```
+![Pipeline](docs/pipeline.svg)
 
 ### Stage 1 — Split
 
