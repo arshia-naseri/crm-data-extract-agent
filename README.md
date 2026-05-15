@@ -34,9 +34,33 @@ Codex CLI reads `Main_Prompt.md`, checks the last git commit for progress (`Batc
 
 `join_batches.py` merges all 68 batch CSVs from `tmp/` into `full_crm.csv` and `full_crm.xlsx`.
 
+## 🧹 Data Normalization
+
+Miner agents follow strict normalization rules before returning data:
+
+- **Money fields** (`Premium`, `Deductible`, `Coverage`): no `$` or commas, exactly 2 decimal places, currency code appended when known (e.g., `453.00 CAD`)
+- **String fields**: no embedded newlines/tabs, collapsed whitespace, trimmed
+- **Expansion**: one row per insured person per confirmed policy (family policies produce multiple rows)
+- **Inclusion**: all confirmed policies extracted, including expired, cancelled, and renewed ones
+- **Deduplication**: by `Folder name` + `First name` + `Last name` + `Policy #` + `Effective`
+
+## 📂 OCR and File Processing
+
+| Document Type           | Tool Chain                                                                |
+| ----------------------- | ------------------------------------------------------------------------- |
+| Text-layer PDFs         | `PyMuPDF` extracts embedded text directly                                 |
+| Scanned/image PDFs      | `PyMuPDF` renders pages to images, Qwen2.5-VL-32B reads via native vision |
+| Scanned PDFs (fallback) | `PyMuPDF` → `Pillow` → `pytesseract` OCR                                  |
+| `.docx` files           | `python-docx` text extraction                                             |
+| `.xls` files            | `xlrd` data extraction                                                    |
+
+The primary OCR method is **Qwen2.5-VL-32B's native vision** — the model processes page images directly without needing traditional OCR. `pytesseract` serves as a fallback for edge cases.
+
 ## 📊 Output
 
-A 16-column CRM table with one row per (insured person, policy) combination. All data shown below is fictitious and for illustration only.
+> **Note:** The sample data included in this repository (`client_info/`, `batch/`, `tmp/`, and `full_crm_example.csv`) uses entirely fictional characters 🦸 for demonstration purposes. No real client data is included.
+
+A 16-column CRM table with one row per (insured person, policy) combination.
 
 | Column       | Example                            |
 | ------------ | ---------------------------------- |
