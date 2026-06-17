@@ -2,6 +2,8 @@
 
 > Multi-agent pipeline that extracts insurance policy data from client documents into a unified CRM table.
 
+> ⚠️ Real client data is excluded for privacy (PIPEDA) reasons — all sample data is fictional.
+
 ## 📋 The Problem
 
 An insurance brokerage with years of messy, unstructured client data spread across 1,696 folders. Folders are named after families or referrals, one folder can contain multiple clients. Inside: nested subfolders, mixed file formats (PDFs, scanned images, Word docs, spreadsheets), quotes mixed in with actual policy confirmations, and no consistent naming or structure.
@@ -53,7 +55,7 @@ Miner agents follow strict normalization rules before returning data:
 
 ## 📊 Output
 
-> **Note:** The sample data included in this repository (`client_info/`, `batch/`, `tmp/`, and `full_crm_example.csv`) uses entirely fictional characters 🦸 for demonstration purposes. No real client data is included.
+> **Note:** Real client data is excluded for privacy (PIPEDA) reasons. The sample data in this repo (`client_info/`, `batch/`, `tmp/`, `full_crm_example.csv`) uses entirely fictional characters 🦸 for demonstration.
 
 A 16-column CRM table with one row per (insured person, policy) combination.
 
