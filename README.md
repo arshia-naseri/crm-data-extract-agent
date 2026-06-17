@@ -23,9 +23,9 @@ Traditional parsing is impossible. Every folder is different. An LLM-based appro
 Codex CLI reads `Main_Prompt.md`, checks the last git commit for progress (`Batch X,Y,Z,W Done`), and picks the next 4 batches to process. For each batch:
 
 1. **Forge** agent reads the batch file, spawns **Miner** agents per folder (up to 3 concurrently).
-2. **Miner** reads every file in the folder recursively: it pulls embedded text from text-layer PDFs, runs Tesseract OCR on scanned/image pages, and reads Word/Excel files. It reasons over the extracted text and returns structured JSON or `NO_ROW`. Pages where Tesseract returns low confidence are escalated to the model's native vision. Up to 3 miners run concurrently per batch.
+2. **Miner** reads every file in the folder recursively (see [OCR and File Processing](#-ocr-and-file-processing)), reasons over the extracted text, and returns structured JSON or `NO_ROW`.
 3. **Forge** aggregates all miner results, deduplicates, normalizes, and writes a CSV to `tmp/batch_{N}_table.csv`.
-4. A git commit (`Batch X,Y,Z,W Done`) tracks progress so the pipeline can resume.
+4. A git commit tracks progress so the pipeline can resume.
 
 ### Stage 3 — Join
 
@@ -50,8 +50,6 @@ Miner agents follow strict normalization rules before returning data:
 | Low-confidence pages | `PyMuPDF` renders the page to an image, Qwen3-VL-32B reads it via native vision |
 | `.docx` files        | `python-docx` text extraction                                                   |
 | `.xls` files         | `xlrd` data extraction                                                          |
-
-The primary OCR method is **Tesseract** (`pytesseract`); pages are deskewed, binarized, and upscaled before OCR. Pages that return low confidence are escalated to **Qwen3-VL-32B's native vision** as a targeted fallback.
 
 ## 📊 Output
 
@@ -116,3 +114,22 @@ crm-data-extract-agent/
 ├── full_crm_example.csv            # Final output
 └── full_crm_example.xlsx           # Final output (Excel)
 ```
+
+## 🚀 Proposed Architecture
+
+![Revised Agent Architecture](docs/improved_architecture.svg)
+
+> The current Miner architecture was chosen to ship a reliable pipeline within a tight timeline — it works correctly and processes all 1,696 folders end to end. The architecture below is the next iteration: same outputs, substantially faster and more accurate.
+
+Today every Miner is a single Qwen3-VL **vision** agent that reads files, OCRs, reasons, and returns rows in one pass.
+
+The proposed architecture splits that one heavy step into three cheaper ones:
+
+1. **Deterministic extraction** — a plain Python script routes each file by extension (`PyMuPDF`, Tesseract, `python-docx`, `xlrd`), writes a clean `.md`, and attaches an extraction confidence score. No model involved.
+2. **Text-only Reader model** — reasons over the compact `.md` instead of doing vision over every rendered page.
+3. **Vision fallback** — native vision runs **only** on pages whose extraction confidence is low, gated by a threshold.
+
+**Why it's faster and more accurate:**
+
+- **Speed** — deterministic extraction is near-instant, and reasoning over short `.md` text is far cheaper than per-page vision. Expensive vision is reserved for the small fraction of low-confidence pages instead of every file.
+- **Accuracy** — clean normalized `.md` gives the model a sharper input, the confidence score makes weak extractions explicit, and threshold-gated vision recovers exactly the pages where OCR fails.
