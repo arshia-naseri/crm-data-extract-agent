@@ -1,0 +1,4 @@
+*.md
+!README.md
+!Main_Prompt.md
+!batch/*

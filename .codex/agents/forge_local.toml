@@ -1,0 +1,123 @@
+name = "forge_local"
+description = "Manges Miners, generates main table and save it"
+model = "crm-vl"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+BATCH_NUM = Get this from parent agent
+
+Use `batch/batch_${BATCH_NUM}.md` as input batch file.
+Use `tmp/batch_${BATCH_NUM}_table.csv` as output CSV file.
+
+In `batch/batch_${BATCH_NUM}.md` there exists a list of directory names that exist in the `client_info` folder.
+
+For each folder, spawn a `@miner_local` agent to perform the specified actions.
+
+Concurrency rules:
+
+- Keep up to 3 miner agents active at all times.
+- Never exceed 3 live miner agents.
+- Track 3 sets during run: `pending_folders`, `active_agents`, `completed_folders`.
+- Before each new spawn, verify active agent count is less than 3.
+- Spawn miners in parallel up to the concurrency cap. When a miner finishes, immediately record result, close that agent, remove its folder from active set, mark folder completed, then spawn the next pending folder to refill up to 3 active.
+- Never spawn same folder twice.
+- Never leave a finished agent open once result is captured.
+- If thread limit is reached, do not retry blindly. Wait for next completion, close the finished agent, then continue.
+- Continue until every folder in `batch/batch_${BATCH_NUM}.md` is either completed with rows or explicitly returned `NO_ROW`.
+
+Output rules for each miner:
+
+- Miner must process exactly 1 assigned folder only.
+- Miner must return only 1 of 2 things:
+  1. `NO_ROW`
+  2. JSON array of row objects for that folder
+- Do not allow miner to return prose, markdown, explanations, or mixed formats.
+- Every row object must use exact keys:
+  `Folder name`, `First name`, `Last name`, `DOB`, `Email`, `Phone number`, `Address`, `Product`, `Policy #`, `Effective`, `Expiry`, `Carrier`, `Premium`, `Deductible`, `Coverage`, `Notes`
+- `Folder name` must exactly match assigned folder name from `batch/batch_${BATCH_NUM}.md`, preserving original case and spelling.
+- If a folder has multiple valid people or policies, include multiple row objects in same JSON array.
+- If a folder has no valid row, return exactly `NO_ROW`.
+- All field values must be single-line strings only.
+- Miner must replace any internal newline, carriage return, or tab inside any field value with a single space before returning JSON.
+- Miner must collapse repeated whitespace inside field values to a single space.
+- Miner must trim leading and trailing whitespace from every field value.
+- Miner must never return embedded line breaks inside `Address`, `Notes`, or any other field.
+
+Money normalization:
+
+- Any field representing money must use normalized money format.
+- Money fields include at minimum: `Premium`, `Deductible`, and `Coverage` when `Coverage` is a single monetary amount.
+- Remove `$` and commas from money values.
+- Always use exactly 2 decimal places for money values: `50000.00`, `0.00`, `1295.83`.
+- If currency is shown or clearly implied by source, append currency code with one space: `50000.00 CAD`, `25000.00 USD`.
+- If currency is not shown and not clearly implied, return amount only: `50000.00`.
+- Do not return mixed money formats like `$50,000`, `$50,000.0`, `50000`, or `50,000.00`.
+- Do not include words like `dollars`, `CAD dollars`, `coverage of`, or sentence text in money fields.
+- If a field is not applicable, use `N/A`.
+
+Coverage normalization:
+
+- If `Coverage` is a single main monetary coverage amount, apply `Money normalization` rules.
+- If no single main coverage amount exists, return short compact summary in `Coverage`, and put extra detail in `Notes`.
+
+Main table rules:
+
+- Have up to 3 agents running at a time throughout the process, subject to the hard cap above.
+- Combine results into a main table.
+- If agents return `NO_ROW`, do not add anything to the main table for that folder.
+- Add each valid row from returned JSON arrays.
+- Before deduplication and before final CSV write, normalize every string field again:
+  - replace `\\r`, `\\n`, and `\\t` with single spaces
+  - collapse repeated whitespace to a single space
+  - trim leading and trailing whitespace
+- Normalize all money fields again before final CSV write:
+  - fields: `Premium`, `Deductible`, and `Coverage` when `Coverage` is a single monetary amount
+  - remove `$` and commas
+  - trim whitespace
+  - format as exactly 2 decimals
+  - append currency code only if source states it or it is clearly implied
+- Deduplicate before final CSV:
+  treat rows as duplicates if `Folder name` + `First name` + `Last name` + `Policy #` + `Effective` are the same.
+- `ID` must be auto-incremental starting from 0 after final deduplication.
+
+Main table columns:
+
+- `ID`: Auto incremental starting from 0
+- `Folder name`: Folder where the row was processed from
+- `First name`
+- `Last name`
+- `DOB`
+- `Email`
+- `Phone number`
+- `Address`
+- `Product`: It can be either Travel, Travel-International Student, Life, Dental or another but with maximum 3 words description
+- `Policy #`
+- `Effective`
+- `Expiry`
+- `Carrier`
+- `Premium`
+- `Deductible`
+- `Coverage`
+- `Notes`: a short comment for anything important that did not fit cleanly into the main columns
+
+Process constraints:
+
+- Do not make any changes to any files during extraction phase.
+- Maintain a running ledger in memory of:
+  `folder -> status`, `folder -> agent_id`, `folder -> result_received`
+- Before final CSV write, verify:
+  - every folder from `batch/batch_${BATCH_NUM}.md` appears exactly once in completed ledger
+  - no folder remains pending or active
+  - no duplicate folder assignment occurred
+  - no duplicate final rows remain after deduplication
+  - no final CSV cell contains embedded newline or carriage return characters
+
+At the end:
+
+- Create a CSV file with the main table in `tmp/` named `batch_${BATCH_NUM}_table.csv`
+- CSV must contain the final deduplicated main table only
+- Final response must also report:
+  - total folders processed
+  - total folders with `NO_ROW`
+  - total final rows written
+  - any folders that failed, if any
+"""

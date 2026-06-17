@@ -1,0 +1,61 @@
+<mxfile host="65bd71144e">
+    <diagram name="Pipeline" id="pipeline">
+        <mxGraphModel dx="512" dy="534" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1560" pageHeight="400" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="9" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFD;strokeColor=none;arcSize=8;glass=0;fillStyle=auto;" parent="1" vertex="1">
+                    <mxGeometry x="15" y="50" width="1310" height="185" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="&lt;b style=&quot;font-size:16px&quot;&gt;client_info/&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;1,696 folders&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;arcSize=20;glass=0;shadow=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="100" width="210" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="" style="endArrow=classic;html=1;strokeColor=#666666;curved=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;flowAnimation=1;" parent="1" source="2" target="4" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="325" y="85"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="3a" value="Stage 1 — Splitting" style="sketch=1;jiggle=2;curveFitting=1;edgeLabel;html=1;align=center;verticalAlign=middle;fontColor=light-dark(#000000, #787878);fontSize=15;labelBackgroundColor=none;" parent="3" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" relative="1" as="geometry">
+                        <mxPoint y="-18" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="4" value="&lt;b style=&quot;font-size:16px&quot;&gt;batch/&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;68 batch files&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;arcSize=20;gradientColor=none;glass=0;shadow=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="390" y="100" width="210" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="" style="endArrow=classic;html=1;strokeColor=#666666;curved=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;flowAnimation=1;" parent="1" source="4" target="6" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="665" y="85"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="5a" value="Stage 2 — Processing" style="sketch=1;jiggle=2;curveFitting=1;edgeLabel;html=1;align=center;verticalAlign=middle;fontColor=light-dark(#000000, #787878);fontSize=15;labelBackgroundColor=none;" parent="5" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" relative="1" as="geometry">
+                        <mxPoint y="-18" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="6" value="&lt;b style=&quot;font-size:16px&quot;&gt;tmp/&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;68 CSV files&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;arcSize=20;shadow=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="730" y="100" width="210" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="" style="endArrow=classic;html=1;strokeColor=#666666;curved=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;shadow=0;flowAnimation=1;" parent="1" source="6" target="8" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="1005" y="85"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="7a" value="Stage 3 — Joining" style="sketch=1;jiggle=2;curveFitting=1;edgeLabel;html=1;align=center;verticalAlign=middle;fontColor=#000000;fontSize=15;labelBackgroundColor=none;" parent="7" vertex="1" connectable="0">
+                    <mxGeometry x="-0.1" relative="1" as="geometry">
+                        <mxPoint y="-18" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="8" value="&lt;b style=&quot;font-size:16px&quot;&gt;full_crm.csv&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:15px&quot;&gt;final CRM&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;arcSize=20;shadow=1;fontSize=16;" parent="1" vertex="1">
+                    <mxGeometry x="1070" y="100" width="210" height="80" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

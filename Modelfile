@@ -1,0 +1,18 @@
+# Deterministic Qwen3-VL-32B variant used by both agents (forge_local, miner_local).
+# OCR is handled primarily by Tesseract; the model's native vision is only a
+# fallback for low-confidence pages, so most inference runs over extracted text.
+# Build once before running the pipeline:
+#   ollama create crm-vl -f Modelfile
+#
+# Determinism (temperature 0 + fixed seed) is the single biggest lever for
+# run-to-run consistency: the same document yields the same rows every run.
+# num_ctx is capped (not the full 256K) to keep 3 concurrent KV caches small
+# enough to stay well clear of the 48GB ceiling.
+
+FROM qwen3-vl:32b
+
+PARAMETER temperature 0
+PARAMETER top_p 1
+PARAMETER top_k 1
+PARAMETER seed 42
+PARAMETER num_ctx 32768
